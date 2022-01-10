@@ -37,6 +37,8 @@ class SignUpViewModel extends BaseViewModel {
 
     result.fold((l) {
       _setLoading(false);
+      nav.push(LoginFormRouter());
+      ToastServices.displayToast('تم التسجيل بنجاح', type: ToastType.Success);
     }, (error) {
       ToastServices.displayToast(error.message, type: ToastType.Error);
       _setLoading(false);

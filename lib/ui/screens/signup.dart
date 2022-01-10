@@ -91,6 +91,7 @@ class _SignUpState extends State<SignUp> {
                               padding: EdgeInsets.all(10),
                               child: TextFormField(
                                 controller: phoneController,
+                                keyboardType: TextInputType.number,
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(),
                                   focusedBorder: OutlineInputBorder(
@@ -101,7 +102,7 @@ class _SignUpState extends State<SignUp> {
                                   labelStyle: TextStyle(color: Colors.green),
                                 ),
                                 validator: (str) {
-                                  var rg = RegExp(r"^[0]{1}[1-9]{9}$");
+                                  var rg = RegExp(r"^[0]{1}[0-9]{9}$");
                                   if (!rg.hasMatch(str!)) {
                                     return "رقم الهانف غير صالح";
                                   }

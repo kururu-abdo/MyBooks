@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:mybooks/core/enums/view_state.dart';
 import 'package:mybooks/core/services/sharedPrefs_service.dart';
+import 'package:mybooks/core/utils/routes/router.dart';
+import 'package:mybooks/core/utils/styles.dart';
+import 'package:mybooks/core/viewmodels/net_amount_viewmodel.dart';
 import 'package:mybooks/main.dart';
 import 'package:mybooks/ui/screens/search_page.dart';
 import 'package:mybooks/ui/widgets/app_title.dart';
 import 'package:mybooks/ui/widgets/process_button_widget.dart';
 import 'package:mybooks/ui/widgets/profit_widget.dart';
+import 'package:stacked/stacked.dart';
 
 class Header extends StatelessWidget {
   final VoidCallback? onMenueIconPressed;
@@ -37,33 +42,9 @@ class Header extends StatelessWidget {
               //     )),
               IconButton(
                   onPressed: () {
-                    Navigator.of(context).push(PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          SearchPage(
-                        user: sharedPrefs.getUser(),
-                      ),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        const begin = Offset(0.0, 1.0);
-                        const end = Offset.zero;
-                        const curve = Curves.easeInOut;
-
-                        var tween = Tween(begin: begin, end: end)
-                            .chain(CurveTween(curve: curve));
-
-                        return SlideTransition(
-                          position: animation.drive(tween),
-                          child: child,
-                        );
-                      },
-                    )
-                        // MaterialPageRoute(
-
-                        //   builder: (_) => SearchPage(
-                        //         user: sharedPrefs.getUser(),
-                        //       ))
-
-                        );
+                    nav.push(SearchPageRouter(
+                      user: sharedPrefs.getUser(),
+                    ));
                   },
                   icon: Icon(
                     Icons.search,
@@ -83,10 +64,43 @@ class Header extends StatelessWidget {
           SizedBox(
             height: 20,
           ),
-          ProfitWidget(
-            amount: "7804 ج.س",
-            isProfit: true,
-          ),
+          ViewModelBuilder<NetAmountViewmodel>.reactive(
+              onModelReady: (model) async {
+                model.initSocket();
+                await model.fetchNetAmount(sharedPrefs.getUser().sId!);
+              },
+              viewModelBuilder: () => NetAmountViewmodel(),
+              builder: (context, model, child) {
+                if (model.state == ViewState.Busy) {
+                  return Center(
+                    child: loadingWidgetOnPrimaryColor,
+                  );
+                } else if (model.state == ViewState.Error) {
+                  return Center(
+                    child: IconButton(
+                        onPressed: () async {
+                          await model
+                              .fetchNetAmount(sharedPrefs.getUser().sId!);
+                        },
+                        icon: Icon(
+                          Icons.refresh,
+                          color: Colors.white,
+                        )),
+                  );
+                } else {
+                  if (model.amount > 0) {
+                    return ProfitWidget(
+                      amount: "${model.amount} ج.س",
+                      isProfit: true,
+                    );
+                  } else {
+                    return ProfitWidget(
+                      amount: "${model.amount * -1} ج.س",
+                      isProfit: false,
+                    );
+                  }
+                }
+              }),
           SizedBox(
             height: 20,
           ),

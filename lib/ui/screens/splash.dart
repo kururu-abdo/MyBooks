@@ -6,6 +6,7 @@ import 'package:auto_route/src/router/auto_router_x.dart';
 import 'package:flutter/material.dart';
 import 'package:mybooks/core/services/sharedPrefs_service.dart';
 import 'package:mybooks/core/utils/routes/router.dart';
+import 'package:mybooks/main.dart';
 import 'package:mybooks/ui/screens/home.dart';
 import 'package:mybooks/ui/screens/login.dart';
 import 'package:page_transition/page_transition.dart';
@@ -32,22 +33,24 @@ class _SplashScreenState extends State<SplashScreenPage> {
 
   void navigationPage() {
     if (sharedPrefs.getLoginState()) {
-      context.router.push(const HomeRouter());
+      nav.replaceAll([HomeRouter()]);
     } else {
-      context.router.push(const LoginFormRouter());
+      nav.replaceAll([LoginFormRouter()]);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    return Material(
+      child: Center(
+        child: Image.asset('assets/images/logo.jpg'),
+      ),
+    );
     return AnimatedSplashScreen.withScreenFunction(
       screenFunction: () async {
         return Home();
       },
       splash: 'assets/images/logo.jpg',
-      // nextScreen: AutoRouter(
-
-      // ),
       splashTransition: SplashTransition.rotationTransition,
       pageTransitionType: PageTransitionType.scale,
     );

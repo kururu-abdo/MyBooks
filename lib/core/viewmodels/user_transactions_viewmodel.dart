@@ -35,7 +35,7 @@ class UserTransactionsViewModel extends BaseViewModel {
       // socket!.on('message', handleMessage);
       // socket!.on('onAcccounts', onAcccounts);
       socket!.on('account-trans', updateTrans);
-           // socket!.on('account-trans', updateTrans);
+      // socket!.on('account-trans', updateTrans);
 
       // socket!.on('add-account', addAccount);
       // socket!.on('delete-account', deleteAccount);

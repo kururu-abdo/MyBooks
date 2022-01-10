@@ -6,6 +6,7 @@ import 'package:mybooks/core/model/new_user.dart';
 import 'package:mybooks/core/model/transaction.dart';
 import 'package:mybooks/core/model/transaction_type.dart';
 import 'package:mybooks/core/services/api.dart';
+import 'package:mybooks/core/services/sharedPrefs_service.dart';
 import 'package:mybooks/core/services/toast_services.dart';
 import 'package:mybooks/core/utils/failure.dart';
 import 'package:mybooks/core/utils/routes/router.dart';
@@ -122,6 +123,8 @@ class TransactionViewModel extends BaseViewModel {
     _setLoading(true);
     var result = await Api.addTransaction(uid, typeid, account, amount);
     result.fold((l) {
+      _setLoading(false);
+
       ToastServices.displayToast("تمت إصافة العملية بنجاح",
           type: ToastType.Success);
       // locator.get<AppRouter>().push(HomeRouter(), onFailure: (failure) {
@@ -137,10 +140,56 @@ class TransactionViewModel extends BaseViewModel {
     });
   }
 
-  fetchTransactions() async {
+  updateTransaction(String trans_id, String typeid, double amount) async {
+    _setLoading(true);
+    var result = await Api.updqtaeTransaction(trans_id, typeid, amount);
+    result.fold((l) {
+      _setLoading(false);
+      _setLoading(false);
+      ToastServices.displayToast("تمت تحديث  العملية بنجاح",
+          type: ToastType.Success);
+      emit('update-transaction',
+          <String, dynamic>{'uid': sharedPrefs.getUser().sId!});
+      // locator.get<AppRouter>().push(HomeRouter(), onFailure: (failure) {
+      //   ToastServices.displayToast(failure.toString(), type: ToastType.Error);
+    }, (error) {
+      ToastServices.displayToast(error.message, type: ToastType.Error);
+      _setLoading(false);
+      _setFailure(error);
+    });
+  }
+
+  dynamic _accountNetAmount = 0.0;
+  dynamic get accountNetAmount => _accountNetAmount;
+  _setAccountNetAmount(dynamic amount) {
+    _accountNetAmount = amount;
+    notifyListeners();
+  }
+
+  fetchAccountNetAmount(String uid, String account) async {
     _setLoading(true);
     _setState(ViewState.Busy);
-    var result = await Api.fetchTransactions();
+    var result = await Api.getAccountNetAmount(uid, account);
+
+    result.fold((l) {
+      // locator.get<AppRouter>().push(HomeRouter(), onFailure: (failure) {
+      //   ToastServices.displayToast(failure.toString(), type: ToastType.Error);
+      // });
+      _setAccountNetAmount(l);
+      _setState(ViewState.Idle);
+      _setLoading(false);
+    }, (error) {
+      ToastServices.displayToast(error.message, type: ToastType.Error);
+      _setLoading(false);
+      _setState(ViewState.Error);
+      _setFailure(error);
+    });
+  }
+
+  fetchTransactions(String uid) async {
+    _setLoading(true);
+    _setState(ViewState.Busy);
+    var result = await Api.fetchTransactions(uid);
 
     result.fold((l) {
       // locator.get<AppRouter>().push(HomeRouter(), onFailure: (failure) {

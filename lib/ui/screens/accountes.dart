@@ -98,7 +98,9 @@ class _AccountsPageState extends State<AccountsPage> {
 
                                 // A pane can dismiss the Slidable.
                                 dismissible:
-                                    DismissiblePane(onDismissed: () {}),
+                                    DismissiblePane(onDismissed: () {
+                                      
+                                    }),
 
                                 // All actions are defined in the children parameter.
                                 children: [

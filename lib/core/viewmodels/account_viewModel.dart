@@ -69,9 +69,15 @@ class AccountViewModel extends BaseViewModel {
   bool get visibility => _isLoading;
   List<Account> _acccounts = [];
   List<Account> get accounts => _acccounts;
-
+  List<Account> _foundedAcccounts = [];
+  List<Account> get foundedAcccounts => _foundedAcccounts;
   _setAccounts(List<Account> accounts) {
     _acccounts = accounts;
+    notifyListeners();
+  }
+
+  _setAccounts2(List<Account> accounts2) {
+    _foundedAcccounts = accounts2;
     notifyListeners();
   }
 
@@ -102,6 +108,24 @@ class AccountViewModel extends BaseViewModel {
       _setLoading(false);
       emit("update-account",
           <String, dynamic>{"uid": sharedPrefs.getUser().sId});
+      // ToastServices.displayToast("تمت إضافة الحساب بنجاح",
+      //     type: ToastType.Success);
+    }, (error) {
+      ToastServices.displayToast(error.message, type: ToastType.Error);
+      _setLoading(false);
+      _setFailure(error);
+    });
+  }
+
+  searchAccount(String q, String uid) async {
+    _setLoading(true);
+    var result = await Api.searchAccounts(q, uid);
+
+    result.fold((l) {
+      print('DATA ' + l.length.toString());
+      _setLoading(false);
+      _setAccounts2(l);
+
       // ToastServices.displayToast("تمت إضافة الحساب بنجاح",
       //     type: ToastType.Success);
     }, (error) {

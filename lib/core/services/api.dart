@@ -14,8 +14,9 @@ import 'package:mybooks/core/model/user.dart';
 import 'package:mybooks/core/utils/failure.dart';
 
 class Api {
-  static const endpoint = 'http://192.168.8.172:7000';
-  //'https://heroku-kururu-mybooks.herokuapp.com';
+  static const endpoint =
+       'http://192.168.8.172:7000';
+     // 'https://heroku-kururu-mybooks.herokuapp.com';
 
   static Future<Either<User, Failure>> SignUser(NewUser user) async {
     try {
@@ -227,11 +228,12 @@ class Api {
     }
   }
 
-  static Future<Either<List<Transaction>, Failure>> fetchTransactions() async {
+  static Future<Either<List<Transaction>, Failure>> fetchTransactions(
+      String uid) async {
     try {
       var res = await http
           .get(
-            Uri.parse(endpoint + "/transaction/all"),
+            Uri.parse(endpoint + "/transaction/all?uid=${uid}"),
           )
           .timeout(Duration(seconds: 12));
 
@@ -306,7 +308,7 @@ class Api {
       var res = await http
           .get(
             Uri.parse(
-                endpoint + "/transaction/user?uid=${uid}&user=${account}"),
+                endpoint + "/transaction/user?uid=${uid}&account=${account}"),
           )
           .timeout(Duration(seconds: 12));
 
@@ -375,6 +377,42 @@ class Api {
     }
   }
 
+  static Future<Either<dynamic, Failure>> updqtaeTransaction(
+      String trans_id, String typeid, double amount) async {
+    try {
+      var res = await http.post(Uri.parse(endpoint + "/transaction/update"),
+          body: <String, dynamic>{
+            "amount": amount.toString(),
+            "id": trans_id,
+            "note": "",
+            "type": typeid,
+          }).timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        print(res.body);
+        //  User user = User.fromJson(json.decode(res.body));
+        return Left(res.body);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" هذا الهاتف مستخدم من قبل شخص اخر "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
   static Future<Either<dynamic, Failure>> getUserNetAmount(
       String uid, String account) async {
     try {
@@ -396,6 +434,342 @@ class Api {
       } else if (res.statusCode == 403) {
         return Right(
             CustomUnauthorizedException(" خطأ في  الهاتف أو كلمة المرور "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<dynamic, Failure>> getNetAmount(String uid) async {
+    try {
+      var res = await http
+          .get(
+            Uri.parse(endpoint + "/transaction/me/net-amount?uid=${uid}"),
+          )
+          .timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        var result = json.decode(res.body);
+
+        return Left(result["net_amount"]);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" خطأ في  الهاتف أو كلمة المرور "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<List<Account>, Failure>> searchAccounts(
+      String q, String uid) async {
+    try {
+      var res = await http
+          .get(
+            Uri.parse(endpoint + "/accounts/search?uid=${uid}&q=${q}"),
+          )
+          .timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        Iterable body = json.decode(res.body);
+        List<Account> accounts = body.map((e) => Account.fromJson(e)).toList();
+        return Left(accounts);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" غير مصرح لك بإجراء العملية "));
+      } else if (res.statusCode == 404) {
+        return Right(CustomUnauthorizedException(" هذا الحساب موجود بالفعل  "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<dynamic, Failure>> getInAmount(String uid) async {
+    try {
+      var res = await http
+          .get(
+            Uri.parse(endpoint + "/transaction/in?uid=${uid}"),
+          )
+          .timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        var result = json.decode(res.body);
+
+        return Left(result["amount"]);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" خطأ في  الهاتف أو كلمة المرور "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<dynamic, Failure>> getOutAmount(String uid) async {
+    try {
+      var res = await http
+          .get(
+            Uri.parse(endpoint + "/transaction/out?uid=${uid}"),
+          )
+          .timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        var result = json.decode(res.body);
+
+        return Left(result["amount"]);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" خطأ في  الهاتف أو كلمة المرور "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<dynamic, Failure>> getMonthAmount(String uid) async {
+    try {
+      var res = await http
+          .get(
+            Uri.parse(endpoint + "/transaction/month?uid=${uid}"),
+          )
+          .timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        var result = json.decode(res.body);
+
+        return Left(result["amount"]);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" خطأ في  الهاتف أو كلمة المرور "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<dynamic, Failure>> getWeekAmount(String uid) async {
+    try {
+      var res = await http
+          .get(
+            Uri.parse(endpoint + "/transaction/week?uid=${uid}"),
+          )
+          .timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        var result = json.decode(res.body);
+
+        return Left(result["amount"]);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" خطأ في  الهاتف أو كلمة المرور "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<dynamic, Failure>> getTodayAmount(String uid) async {
+    try {
+      var res = await http
+          .get(
+            Uri.parse(endpoint + "/transaction/today?uid=${uid}"),
+          )
+          .timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        var result = json.decode(res.body);
+
+        return Left(result["amount"]);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" خطأ في  الهاتف أو كلمة المرور "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<dynamic, Failure>> getAccountNetAmount(
+      String uid, String account) async {
+    try {
+      var res = await http
+          .get(
+            Uri.parse(endpoint +
+                "/transaction/user/net-amount?uid=${uid}&account=${account}"),
+          )
+          .timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        var result = json.decode(res.body);
+
+        return Left(result["net_amount"]);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" خطأ في  الهاتف أو كلمة المرور "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<User, Failure>> getUser(String uid) async {
+    try {
+      var res = await http
+          .get(Uri.parse(endpoint + "/user/profile?uid=${uid}"))
+          .timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        print(res.body);
+        User user = User.fromJson(json.decode(res.body));
+        return Left(user);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" هذا الهاتف مستخدم من قبل شخص اخر "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<User, Failure>> updateUser(User user) async {
+    try {
+      var res = await http
+          .post(Uri.parse(endpoint + "/user/update"), body: <String, dynamic>{
+        'id': user.sId,
+        'name': user.name,
+        'place_name': user.placeName,
+        'phone': user.phone,
+        'password': user.password
+      }).timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        print(res.body);
+        User user = User.fromJson(json.decode(res.body));
+        return Left(user);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" هذا الهاتف مستخدم من قبل شخص اخر "));
       } else {
         return Right(UnknownException("خطأ غير معروف"));
       }

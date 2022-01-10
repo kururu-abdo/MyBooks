@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mybooks/core/enums/view_state.dart';
 import 'package:mybooks/core/model/account.dart';
 import 'package:mybooks/core/model/transaction_type.dart';
 import 'package:mybooks/core/services/sharedPrefs_service.dart';
 import 'package:mybooks/core/utils/helper.dart';
+import 'package:mybooks/core/utils/routes/router.dart';
+import 'package:mybooks/core/utils/strings.dart';
+import 'package:mybooks/core/utils/styles.dart';
 import 'package:mybooks/core/viewmodels/login_viewmodel.dart';
 import 'package:mybooks/core/viewmodels/transaction_type_viewmodel.dart';
 import 'package:mybooks/core/viewmodels/trasnsaction_view_model.dart';
 import 'package:mybooks/core/viewmodels/user_transactions_viewmodel.dart';
+import 'package:mybooks/main.dart';
+import 'package:mybooks/ui/screens/edit_transaction.dart';
 import 'package:mybooks/ui/widgets/transaction.dart';
 import 'package:stacked/stacked.dart';
 
@@ -58,6 +64,11 @@ class _AcccountDetailsState extends State<AcccountDetails>
               ),
               leading: getLeadingWidget(context)),
           body: ViewModelBuilder<TransactionViewModel>.reactive(
+            onModelReady: (model) async {
+              model.initSocket();
+              await model.fetchAccountNetAmount(
+                  sharedPrefs.getUser().sId!, widget.account!.sId!);
+            },
             viewModelBuilder: () => TransactionViewModel(),
             builder: (context, model, child) => Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -79,9 +90,23 @@ class _AcccountDetailsState extends State<AcccountDetails>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            children: [Text("صافي الحساب"), Text("133 ج.س")],
-                          ),
+                          Builder(builder: (context) {
+                            if (model.isLoading) {
+                              return Center(
+                                child: loadingWidget,
+                              );
+                            }
+                            return Column(
+                              children: [
+                                Text("صافي الحساب"),
+                                Text("${model.accountNetAmount} ج.س",
+                                    style: TextStyle(
+                                        color: model.accountNetAmount >= 0
+                                            ? Colors.black
+                                            : Colors.red))
+                              ],
+                            );
+                          }),
                           InkWell(
                             onTap: () {
                               _animationController!.forward();
@@ -222,9 +247,11 @@ class _AcccountDetailsState extends State<AcccountDetails>
                               viewModelBuilder: () =>
                                   UserTransactionsViewModel(),
                               onModelReady: (model3) async {
+                                model3.initSocket();
                                 await model3.fetchTransactions(
-                                    widget.account!.sId!,
-                                    sharedPrefs.getUser().sId!);
+                                  sharedPrefs.getUser().sId!,
+                                  widget.account!.sId!,
+                                );
 
                                 model.initSocket();
                               },
@@ -242,11 +269,78 @@ class _AcccountDetailsState extends State<AcccountDetails>
                                     physics: BouncingScrollPhysics(),
                                     children: model3.transactions
                                         .map(
-                                          (trans) => TransactionWidget(
-                                            account: "${trans.account!.name}",
-                                            amount: "${trans.amount} ج.س",
-                                            isIn: model.isIn(trans),
-                                            date: trans.date,
+                                          (trans) => Slidable(
+                                            key: UniqueKey(),
+                                            startActionPane: ActionPane(
+                                              // A motion is a widget used to control how the pane animates.
+                                              motion: const ScrollMotion(),
+
+                                              // A pane can dismiss the Slidable.
+                                              // dismissible: DismissiblePane(
+                                              //     closeOnCancel: true, onDismissed: () {}),
+
+                                              // All actions are defined in the children parameter.
+                                              children: [
+                                                // A SlidableAction can have an icon and/or a label.
+                                                SlidableAction(
+                                                  onPressed: (context) async {
+                                                    //   await model.deleteAccount(e.sId!);
+                                                  },
+                                                  backgroundColor:
+                                                      Color(0xFFFE4A49),
+                                                  //     foregroundColor: Colors.white,
+                                                  icon: Icons.delete,
+                                                  label: deleteText,
+                                                ),
+                                                SlidableAction(
+                                                  onPressed: (context) {
+                                                    nav.push(EditTransRouter(
+                                                        transaction: trans));
+                                                  },
+                                                  backgroundColor: Colors.green,
+                                                  //    foregroundColor: Colors.white,
+                                                  icon: Icons.edit,
+                                                  label: EditText,
+                                                ),
+                                              ],
+                                            ),
+                                            endActionPane: ActionPane(
+                                              // A motion is a widget used to control how the pane animates.
+                                              motion: const ScrollMotion(),
+
+                                              // A pane can dismiss the Slidable.
+                                              // dismissible: DismissiblePane(
+                                              //     closeOnCancel: true, onDismissed: () {}),
+
+                                              // All actions are defined in the children parameter.
+                                              children: [
+                                                // A SlidableAction can have an icon and/or a label.
+                                                SlidableAction(
+                                                  onPressed: (context) async {},
+                                                  backgroundColor:
+                                                      Color(0xFFFE4A49),
+                                                  //     foregroundColor: Colors.white,
+                                                  icon: Icons.delete,
+                                                  label: deleteText,
+                                                ),
+                                                SlidableAction(
+                                                  onPressed: (context) {
+                                                    nav.push(EditTransRouter(
+                                                        transaction: trans));
+                                                  },
+                                                  backgroundColor: Colors.green,
+                                                  //    foregroundColor: Colors.white,
+                                                  icon: Icons.edit,
+                                                  label: EditText,
+                                                ),
+                                              ],
+                                            ),
+                                            child: TransactionWidget(
+                                              account: "${trans.account!.name}",
+                                              amount: "${trans.amount} ج.س",
+                                              isIn: model.isIn(trans),
+                                              date: trans.date,
+                                            ),
                                           ),
                                         )
                                         .toList(),

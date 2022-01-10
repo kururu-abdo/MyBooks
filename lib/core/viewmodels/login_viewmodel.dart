@@ -43,10 +43,10 @@ class LoginViewModel extends BaseViewModel {
     result.fold((l) {
       sharedPrefs.saveUser(l);
       sharedPrefs.saveLoginState(true);
-
-      locator.get<AppRouter>().push(HomeRouter(), onFailure: (failure) {
-        ToastServices.displayToast(failure.toString(), type: ToastType.Error);
-      });
+      nav.replaceAll([HomeRouter()]);
+      // locator.get<AppRouter>().push(HomeRouter(), onFailure: (failure) {
+      //   ToastServices.displayToast(failure.toString(), type: ToastType.Error);
+      // });
       _setLoading(false);
     }, (error) {
       ToastServices.displayToast(error.message, type: ToastType.Error);

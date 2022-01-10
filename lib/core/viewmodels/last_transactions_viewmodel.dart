@@ -44,7 +44,7 @@ class LastTransactionViewModel extends BaseViewModel {
     Iterable I = data;
     List<Transaction> trans = I.map((e) => Transaction.fromJson(e)).toList();
 
-    _setTransactions(trans);
+    _setlastTransactions(trans);
   }
 
   void emit(String event, data) {

@@ -18,7 +18,7 @@ class _ProfitWidgetState extends State<ProfitWidget> {
         style: TextStyle(
             color: widget.isProfit! ? Colors.white : Colors.red,
             fontFamily: "Cairo",
-            fontSize: 20,
+            // fontSize: 20,
             fontWeight: FontWeight.bold),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mybooks/core/utils/helper.dart';
 import 'package:mybooks/core/utils/sizes.dart';
 
 class TransactionWidget extends StatelessWidget {
@@ -25,9 +26,7 @@ class TransactionWidget extends StatelessWidget {
         //       offset: Offset(0, -10))
         // ],
       ),
-      child:
-      
-       Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -41,9 +40,9 @@ class TransactionWidget extends StatelessWidget {
               )
             ],
           ),
-          Text(
+          Text(getFormattedDate(
             date!,
-          )
+          ))
         ],
       ),
     );

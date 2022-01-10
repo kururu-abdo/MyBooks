@@ -18,6 +18,10 @@ class SharedPrefs {
     _sharedPrefs!.setBool("ISLOGGEDIN", state);
   }
 
+  void clear() async {
+    await _sharedPrefs!.clear();
+  }
+
   bool getLoginState() {
     var state = _sharedPrefs!.getBool("ISLOGGEDIN") ?? false;
     return state;
@@ -25,6 +29,7 @@ class SharedPrefs {
 
   void saveUser(User user) {
     _sharedPrefs!.setString("USER", json.encode(user.toJson()));
+    _sharedPrefs!.reload();
   }
 
   User getUser() {

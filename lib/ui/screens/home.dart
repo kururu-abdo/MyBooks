@@ -74,7 +74,9 @@ class _HomeState extends State<Home> {
         backgroundColor: _showButtomSheet ? Colors.grey : Colors.white,
         routes: const [
           HomeBodyRoute(),
+          ReportPageRouter(),
           AccountsRouter(),
+          ProfilePageRouter(),
         ],
 
         builder: (context, child, animation) {
@@ -109,12 +111,28 @@ class _HomeState extends State<Home> {
                 title: const Text('الرئيسية'),
               ),
               SalomonBottomBarItem(
-                //      selectedColor: Colors.blue[200],
+                //     selectedColor: Colors.amberAccent,
                 icon: const Icon(
-                  Icons.person,
+                  Icons.show_chart,
+                  size: 30,
+                ),
+                title: const Text('ملخص'),
+              ),
+              SalomonBottomBarItem(
+                //     selectedColor: Colors.amberAccent,
+                icon: const Icon(
+                  Icons.account_balance_wallet_sharp,
                   size: 30,
                 ),
                 title: const Text('الحسابات'),
+              ),
+              SalomonBottomBarItem(
+                //      selectedColor: Colors.blue[200],
+                icon: const Icon(
+                  Icons.face,
+                  size: 30,
+                ),
+                title: const Text('الملف الشخصي'),
               ),
             ],
           );
