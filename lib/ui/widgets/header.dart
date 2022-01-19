@@ -110,12 +110,11 @@ class Header extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ProcessButtonWidget(
-                  text: "داخل",
+                  text: "مدين",
                   icon: Icons.south,
                   isIN: false,
                 ),
-                ProcessButtonWidget(
-                    text: " خارج", icon: Icons.north, isIN: true)
+                ProcessButtonWidget(text: "دائن", icon: Icons.north, isIN: true)
               ],
             ),
           ))

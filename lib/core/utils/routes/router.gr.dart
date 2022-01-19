@@ -30,6 +30,13 @@ class _$AppRouter extends RootStackRouter {
       return MaterialPageX<dynamic>(
           routeData: routeData, child: const AllTransactions());
     },
+    PaymentPageRouter.name: (routeData) {
+      final args = routeData.argsAs<PaymentPageRouterArgs>(
+          orElse: () => const PaymentPageRouterArgs());
+      return MaterialPageX<dynamic>(
+          routeData: routeData,
+          child: PaymentPage(key: args.key, trans: args.trans));
+    },
     EditTransRouter.name: (routeData) {
       final args = routeData.argsAs<EditTransRouterArgs>(
           orElse: () => const EditTransRouterArgs());
@@ -75,6 +82,7 @@ class _$AppRouter extends RootStackRouter {
         RouteConfig(SignUpRouter.name, path: '/signup'),
         RouteConfig(LoginFormRouter.name, path: '/login'),
         RouteConfig(AllTransactionsRouter.name, path: '/trans'),
+        RouteConfig(PaymentPageRouter.name, path: '/payment'),
         RouteConfig(EditTransRouter.name, path: '/edit_trans'),
         RouteConfig(SearchPageRouter.name, path: '/search_page'),
         RouteConfig(EditProfileRouter.name, path: '/edit_profile'),
@@ -122,6 +130,30 @@ class AllTransactionsRouter extends PageRouteInfo<void> {
       : super(AllTransactionsRouter.name, path: '/trans');
 
   static const String name = 'AllTransactionsRouter';
+}
+
+/// generated route for
+/// [PaymentPage]
+class PaymentPageRouter extends PageRouteInfo<PaymentPageRouterArgs> {
+  PaymentPageRouter({Key? key, Transaction? trans})
+      : super(PaymentPageRouter.name,
+            path: '/payment',
+            args: PaymentPageRouterArgs(key: key, trans: trans));
+
+  static const String name = 'PaymentPageRouter';
+}
+
+class PaymentPageRouterArgs {
+  const PaymentPageRouterArgs({this.key, this.trans});
+
+  final Key? key;
+
+  final Transaction? trans;
+
+  @override
+  String toString() {
+    return 'PaymentPageRouterArgs{key: $key, trans: $trans}';
+  }
 }
 
 /// generated route for

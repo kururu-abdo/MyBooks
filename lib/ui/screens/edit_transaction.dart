@@ -4,9 +4,13 @@ import 'package:mybooks/core/model/transaction.dart';
 import 'package:mybooks/core/model/transaction_type.dart';
 import 'package:mybooks/core/services/sharedPrefs_service.dart';
 import 'package:mybooks/core/utils/helper.dart';
+import 'package:mybooks/core/utils/routes/router.dart';
 import 'package:mybooks/core/utils/styles.dart';
+import 'package:mybooks/core/viewmodels/payment_viewmodel.dart';
 import 'package:mybooks/core/viewmodels/transaction_type_viewmodel.dart';
 import 'package:mybooks/core/viewmodels/trasnsaction_view_model.dart';
+import 'package:mybooks/main.dart';
+import 'package:mybooks/ui/screens/payment_page.dart';
 import 'package:stacked/stacked.dart';
 
 class EditTransaction extends StatefulWidget {
@@ -47,6 +51,14 @@ class _UserTransactionState extends State<EditTransaction> {
             model.initSocket();
           },
           builder: (context, model, child) => ListView(children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("المبلغ المتبفي"),
+                    Text("23 ج .س"),
+                  ],
+                ),
+                SizedBox(height: 20.0),
                 Container(
                     height: 350,
                     width: double.infinity,
@@ -153,16 +165,17 @@ class _UserTransactionState extends State<EditTransaction> {
                             SizedBox(height: 20.0),
                             InkWell(
                               onTap: () async {
-                                await model.updateTransaction(
-                                    widget.transaction!.sId!,
-                                    model.transaction_type.sId!,
-                                    double.parse(_priceController.text));
+                                nav.push(PaymentPageRouter(
+                                    trans: widget.transaction));
                               },
-                              child: model.isLoading
-                                  ? Center(
-                                      child: loadingWidget,
-                                    )
-                                  : Container(
+                              child:
+                                  // model.isLoading
+                                  //     ? Center(
+                                  //         child: loadingWidget,
+                                  //       )
+                                  //     :
+
+                                  Container(
                                       width: double.infinity,
                                       height: 50,
                                       decoration: BoxDecoration(
@@ -175,19 +188,65 @@ class _UserTransactionState extends State<EditTransaction> {
                                       //     EdgeInsets.fromLTRB(10, 0, 10, 0),
 
                                       child: Center(
-                                        child: Text(
-                                          'سداد ',
-                                          style: TextStyle(color: Colors.white),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'سداد ',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            SizedBox(width: 10.0),
+                                            Image.asset(
+                                              'assets/images/done.png',
+                                              height: 20,
+                                              width: 20,
+                                            )
+                                          ],
                                         ),
                                       )),
                             ),
-                            SizedBox(height: 20.0),
-                            Text(
-                              "عمليات الدفع",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            )
                           ],
                         ))),
+                SizedBox(height: 10.0),
+                Center(
+                  child: Text(
+                    "عمليات السداد",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(height: 10.0),
+                Container(
+                    height: 500,
+                    child: ViewModelBuilder<PaymentViewModel>.reactive(
+                      viewModelBuilder: () => PaymentViewModel(),
+                      onModelReady: (model2) async {
+                        await model2.getPayments(widget.transaction!.sId!);
+                        model2.initSocket();
+                      },
+                      builder: (context, model2, child) {
+                        if (model2.isLoading) {
+                          return Center(
+                            child: loadingWidget,
+                          );
+                        }
+                        return ListView.builder(
+                          itemCount: model2.trans.length,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              child: ListTile(
+                                title: Text(
+                                    model2.trans[index].amount.toString() +
+                                        " ج.س"),
+                                subtitle: Text(getFormattedDate(
+                                    model2.trans[index].date!)),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ))
               ])),
     );
   }

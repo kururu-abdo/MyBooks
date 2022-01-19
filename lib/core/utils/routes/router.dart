@@ -10,6 +10,7 @@ import 'package:mybooks/ui/screens/home.dart';
 import 'package:mybooks/ui/screens/home_body.dart';
 import 'package:mybooks/ui/screens/login.dart';
 import 'package:mybooks/ui/screens/new_account.dart';
+import 'package:mybooks/ui/screens/payment_page.dart';
 import 'package:mybooks/ui/screens/profile.dart';
 import 'package:mybooks/ui/screens/reportPage.dart';
 import 'package:mybooks/ui/screens/search_page.dart';
@@ -30,6 +31,7 @@ part 'router.gr.dart';
     AutoRoute(path: '/login', page: LoginForm, name: "LoginFormRouter"),
     AutoRoute(
         path: '/trans', page: AllTransactions, name: "AllTransactionsRouter"),
+    AutoRoute(path: '/payment', page: PaymentPage, name: "PaymentPageRouter"),
     AutoRoute(
         path: '/edit_trans', page: EditTransaction, name: "EditTransRouter"),
     AutoRoute(path: '/search_page', page: SearchPage, name: "SearchPageRouter"),

@@ -43,7 +43,7 @@ class _SplashScreenState extends State<SplashScreenPage> {
   Widget build(BuildContext context) {
     return Material(
       child: Center(
-        child: Image.asset('assets/images/logo.jpg'),
+        child: Image.asset('assets/images/logo.png'),
       ),
     );
     return AnimatedSplashScreen.withScreenFunction(
