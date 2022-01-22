@@ -15,8 +15,8 @@ import 'package:mybooks/core/model/user.dart';
 import 'package:mybooks/core/utils/failure.dart';
 
 class Api {
-  static const endpoint = 'http://192.168.8.100:7000';
-  // 'https://heroku-kururu-mybooks.herokuapp.com';
+  static const endpoint = 'http://192.168.8.172:7000';
+  //  'https://heroku-kururu-mybooks.herokuapp.com';
 
   static Future<Either<User, Failure>> SignUser(NewUser user) async {
     try {
@@ -132,6 +132,39 @@ class Api {
         print(res.body);
         Account account = Account.fromJson(json.decode(res.body));
         return Left(account);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" غير مصرح لك بإجراء العملية "));
+      } else if (res.statusCode == 404) {
+        return Right(CustomUnauthorizedException(" هذا الحساب موجود بالفعل  "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<dynamic, Failure>> deleteTransaction(String uid) async {
+    try {
+      var res = await http.post(Uri.parse(endpoint + "/transaction/delete"),
+          body: <String, dynamic>{
+            "id": uid,
+          }).timeout(Duration(seconds: 12));
+      if (res.statusCode == 200) {
+        print(json.decode(res.body).runtimeType);
+
+        return Left(res.body);
       } else if (res.statusCode == 500 ||
           res.statusCode == 501 ||
           res.statusCode == 503) {
@@ -823,7 +856,7 @@ class Api {
     try {
       var res = await http
           .get(
-            Uri.parse(endpoint + "/payment/all?id=${trans}"),
+            Uri.parse(endpoint + "/payment/all?transId=${trans}"),
           )
           .timeout(Duration(seconds: 12));
 

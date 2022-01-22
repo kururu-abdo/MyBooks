@@ -263,7 +263,7 @@ class _ReportPageState extends State<ReportPage> {
                           child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Text("اجمالي المبالغ الداخلة",
+                          Text("اجمالي  الدائنون",
                               style: TextStyle(color: onPrimaryColor)),
                           ViewModelBuilder<StatsViewmodel>.reactive(
                               onModelReady: (model) async {
@@ -314,7 +314,7 @@ class _ReportPageState extends State<ReportPage> {
                           child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Text("اجمالي المبالغ الخارجة",
+                          Text("اجمالي  المدينون",
                               style: TextStyle(color: onPrimaryColor)),
                           ViewModelBuilder<StatsViewmodel>.reactive(
                               onModelReady: (model) async {

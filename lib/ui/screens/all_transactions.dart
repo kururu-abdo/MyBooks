@@ -9,6 +9,7 @@ import 'package:mybooks/core/utils/styles.dart';
 import 'package:mybooks/core/viewmodels/trasnsaction_view_model.dart';
 import 'package:mybooks/main.dart';
 import 'package:mybooks/ui/screens/edit_transaction.dart';
+import 'package:mybooks/ui/widgets/confimtaion_dialoge.dart';
 import 'package:mybooks/ui/widgets/first_layer.dart';
 import 'package:mybooks/ui/widgets/second_layer.dart';
 import 'package:mybooks/ui/widgets/transaction.dart';
@@ -66,7 +67,14 @@ class _AllTransactionsState extends State<AllTransactions> {
                                 // A SlidableAction can have an icon and/or a label.
                                 SlidableAction(
                                   onPressed: (context) async {
-                                    //   await model.deleteAccount(e.sId!);
+                                    confirmationDialog(
+                                        context, 'هل تريد حذف العملية؟',
+                                        onOkBtnPressed: () async {
+                                      await model.deleteTransaction(
+                                          model.transactions[index].sId!);
+                                    }, onCancelBtnPressed: () {
+                                      nav.pop();
+                                    });
                                   },
                                   backgroundColor: Color(0xFFFE4A49),
                                   //     foregroundColor: Colors.white,
@@ -98,7 +106,16 @@ class _AllTransactionsState extends State<AllTransactions> {
                               children: [
                                 // A SlidableAction can have an icon and/or a label.
                                 SlidableAction(
-                                  onPressed: (context) async {},
+                                  onPressed: (context) async {
+                                    confirmationDialog(
+                                        context, 'هل تريد حذف العملية؟',
+                                        onOkBtnPressed: () {
+                                      model.deleteTransaction(
+                                          model.transactions[index].sId!);
+                                    }, onCancelBtnPressed: () {
+                                      nav.pop();
+                                    });
+                                  },
                                   backgroundColor: Color(0xFFFE4A49),
                                   //     foregroundColor: Colors.white,
                                   icon: Icons.delete,

@@ -10,6 +10,7 @@ import 'package:mybooks/core/viewmodels/trasnsaction_view_model.dart';
 import 'package:mybooks/core/viewmodels/user_transactions_viewmodel.dart';
 import 'package:mybooks/main.dart';
 import 'package:mybooks/ui/screens/edit_transaction.dart';
+import 'package:mybooks/ui/widgets/confimtaion_dialoge.dart';
 import 'package:mybooks/ui/widgets/transaction.dart';
 import 'package:stacked/stacked.dart';
 
@@ -68,7 +69,19 @@ class _TransactionListState extends State<TransactionList> {
                               // A SlidableAction can have an icon and/or a label.
                               SlidableAction(
                                 onPressed: (context) async {
-                                  //   await model.deleteAccount(e.sId!);
+                                
+                                    confirmationDialog(
+                                        context, 'هل تريد حذف العملية؟',
+                                        onOkBtnPressed: () {
+                                      model.deleteTransaction(
+                                         trans.sId!);
+                                    }, onCancelBtnPressed: () {
+                                      nav.pop();
+                                    });
+                                 
+                                 
+                                 
+                                 
                                 },
                                 backgroundColor: Color(0xFFFE4A49),
                                 //     foregroundColor: Colors.white,

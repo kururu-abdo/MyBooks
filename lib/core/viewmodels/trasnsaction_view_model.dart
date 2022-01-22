@@ -206,6 +206,29 @@ class TransactionViewModel extends BaseViewModel {
     });
   }
 
+  deleteTransaction(String uid) async {
+    _setLoading(true);
+    _setState(ViewState.Busy);
+    var result = await Api.deleteTransaction(uid);
+
+    result.fold((l) {
+      // locator.get<AppRouter>().push(HomeRouter(), onFailure: (failure) {
+      //   ToastServices.displayToast(failure.toString(), type: ToastType.Error);
+      // });
+      ToastServices.displayToast('تم حذف العملية بنجاح',
+          type: ToastType.Success);
+
+      _setState(ViewState.Idle);
+      _setLoading(false);
+      nav.pop();
+    }, (error) {
+      ToastServices.displayToast(error.message, type: ToastType.Error);
+      _setLoading(false);
+      _setState(ViewState.Error);
+      _setFailure(error);
+    });
+  }
+
   // fetchLastTransactions() async {
   //   _setLoading(true);
   //   _setState(ViewState.Busy);
@@ -227,6 +250,6 @@ class TransactionViewModel extends BaseViewModel {
   // }
 
   bool isIn(Transaction tr) {
-    return tr.type!.typeName == "خارج";
+    return tr.type!.typeName == "مدين";
   }
 }

@@ -8,6 +8,8 @@ import 'package:mybooks/core/utils/failure.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:stacked/stacked.dart';
 
+import '../../main.dart';
+
 class LastTransactionViewModel extends BaseViewModel {
   Socket? socket;
   void initSocket() {
@@ -108,7 +110,28 @@ class LastTransactionViewModel extends BaseViewModel {
   // addTransaction() async {
   //   _setState(ViewState.Busy);
   // }
+ deleteTransaction(String uid) async {
+    _setLoading(true);
+    _setState(ViewState.Busy);
+    var result = await Api.deleteTransaction(uid);
 
+    result.fold((l) {
+      // locator.get<AppRouter>().push(HomeRouter(), onFailure: (failure) {
+      //   ToastServices.displayToast(failure.toString(), type: ToastType.Error);
+      // });
+      ToastServices.displayToast('تم حذف العملية بنجاح',
+          type: ToastType.Success);
+
+      _setState(ViewState.Idle);
+      _setLoading(false);
+      nav.pop();
+    }, (error) {
+      ToastServices.displayToast(error.message, type: ToastType.Error);
+      _setLoading(false);
+      _setState(ViewState.Error);
+      _setFailure(error);
+    });
+  }
   fetchLastTransactions(String uid) async {
     _setLoading(true);
     _setState(ViewState.Busy);
@@ -130,6 +153,6 @@ class LastTransactionViewModel extends BaseViewModel {
   }
 
   bool isIn(Transaction tr) {
-    return tr.type!.typeName == "خارج";
+    return tr.type!.typeName == "مدين";
   }
 }

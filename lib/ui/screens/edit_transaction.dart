@@ -36,6 +36,7 @@ class _UserTransactionState extends State<EditTransaction> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: getLeadingWidget(context),
         title: Text(
@@ -50,7 +51,7 @@ class _UserTransactionState extends State<EditTransaction> {
           onModelReady: (model) {
             model.initSocket();
           },
-          builder: (context, model, child) => ListView(children: [
+          builder: (context, model, child) => Column(children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -217,36 +218,37 @@ class _UserTransactionState extends State<EditTransaction> {
                   ),
                 ),
                 SizedBox(height: 10.0),
-                Container(
-                    height: 500,
+                Expanded(
+                    //      height: 500,
                     child: ViewModelBuilder<PaymentViewModel>.reactive(
-                      viewModelBuilder: () => PaymentViewModel(),
-                      onModelReady: (model2) async {
-                        await model2.getPayments(widget.transaction!.sId!);
-                        model2.initSocket();
-                      },
-                      builder: (context, model2, child) {
-                        if (model2.isLoading) {
-                          return Center(
-                            child: loadingWidget,
-                          );
-                        }
-                        return ListView.builder(
-                          itemCount: model2.trans.length,
-                          itemBuilder: (context, index) {
-                            return Card(
-                              child: ListTile(
-                                title: Text(
-                                    model2.trans[index].amount.toString() +
-                                        " ج.س"),
-                                subtitle: Text(getFormattedDate(
-                                    model2.trans[index].date!)),
-                              ),
-                            );
-                          },
+                  viewModelBuilder: () => PaymentViewModel(),
+                  onModelReady: (model2) async {
+                    await model2.getPayments(widget.transaction!.sId!);
+                    model2.initSocket();
+                  },
+                  builder: (context, model2, child) {
+                    if (model2.isLoading) {
+                      return Center(
+                        child: loadingWidget,
+                      );
+                    }
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.vertical,
+                      itemCount: model2.trans.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          child: ListTile(
+                            title: Text(
+                                model2.trans[index].amount.toString() + " ج.س"),
+                            subtitle: Text(
+                                getFormattedDate(model2.trans[index].date!)),
+                          ),
                         );
                       },
-                    ))
+                    );
+                  },
+                ))
               ])),
     );
   }
