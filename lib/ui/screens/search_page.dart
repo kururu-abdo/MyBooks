@@ -21,9 +21,15 @@ class _SearchPageState extends State<SearchPage> {
   var _controller = TextEditingController();
   @override
   void initState() {
-    _focuseNode.requestFocus();
+    // _focuseNode.requestFocus();
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    //  _focuseNode.unfocus();
+    super.dispose();
   }
 
   @override
@@ -32,6 +38,7 @@ class _SearchPageState extends State<SearchPage> {
       child: ViewModelBuilder<AccountViewModel>.reactive(
         viewModelBuilder: () => AccountViewModel(),
         builder: (context, model, child) => Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: AppBar(
             leading: getLeadingWidget(context),
             elevation: 0.0,
@@ -50,7 +57,7 @@ class _SearchPageState extends State<SearchPage> {
                 },
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: 'اسم صاحب الحساب',
+                  hintText: 'اسم  الحساب',
                   focusedBorder: OutlineInputBorder(
                     borderSide:
                         const BorderSide(color: Colors.green, width: 2.0),
@@ -67,6 +74,7 @@ class _SearchPageState extends State<SearchPage> {
             } else {
               if (model.foundedAcccounts.length >= 1) {
                 return ListView.builder(
+                    physics: NeverScrollableScrollPhysics(),
                     itemCount: model.foundedAcccounts.length,
                     itemBuilder: (context, index) {
                       return Card(
@@ -84,17 +92,13 @@ class _SearchPageState extends State<SearchPage> {
                       );
                     });
               } else {
-                return Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Image.asset('assets/images/empty_list.gif'),
-                          Text('لا توجد نتائج')
-                        ]),
-                  ),
-                );
+                return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset('assets/images/empty_list.gif'),
+                      Text('لا توجد نتائج')
+                    ]);
               }
             }
           }),

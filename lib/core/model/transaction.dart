@@ -12,6 +12,7 @@ class Transaction {
   String? date;
   String? createdAt;
   String? updatedAt;
+  String? status;
   int? iV;
 
   Transaction(
@@ -24,20 +25,23 @@ class Transaction {
       this.date,
       this.createdAt,
       this.updatedAt,
+      this.status,
       this.iV});
 
   Transaction.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     amount = json['amount'];
     note = json['note'];
-    type = json['type'] != null ? new TransactionType.fromJson(json['type']) : null;
+    type = json['type'] != null
+        ? new TransactionType.fromJson(json['type'])
+        : null;
     account =
         json['account'] != null ? new Account.fromJson(json['account']) : null;
-    userID =
-        json['userID'] != null ? new User.fromJson(json['userID']) : null;
+    userID = json['userID'] != null ? new User.fromJson(json['userID']) : null;
     date = json['date'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
+    status = json['status'];
     iV = json['__v'];
   }
 
@@ -46,6 +50,7 @@ class Transaction {
     data['_id'] = this.sId;
     data['amount'] = this.amount;
     data['note'] = this.note;
+    data['status'] = status;
     if (this.type != null) {
       data['type'] = this.type!.toJson();
     }

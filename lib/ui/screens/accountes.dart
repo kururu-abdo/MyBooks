@@ -35,7 +35,14 @@ class _AccountsPageState extends State<AccountsPage> {
         height: 80,
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
+            boxShadow: [
+              BoxShadow(
+                  spreadRadius: 1.0,
+                  blurRadius: 15.0,
+                  offset: Offset(0, 4),
+                  color: Colors.greenAccent.withOpacity(0.35))
+            ],
+            color: Theme.of(context).scaffoldBackgroundColor,
             borderRadius:
                 const BorderRadius.vertical(bottom: Radius.circular(30))),
         child: Row(
@@ -48,12 +55,12 @@ class _AccountsPageState extends State<AccountsPage> {
                 },
                 icon: Icon(
                   Icons.person_add,
-                  color: Colors.white,
+                  color: Colors.black,
                 )),
             Text(
               sharedPrefs.getUser().placeName!,
               style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
             )
           ],
         ),
@@ -63,6 +70,7 @@ class _AccountsPageState extends State<AccountsPage> {
       ),
       Container(
           height: MediaQuery.of(context).size.height - 250,
+          padding: EdgeInsets.all(10),
           child: ViewModelBuilder<AccountViewModel>.reactive(
             viewModelBuilder: () => AccountViewModel(),
             onModelReady: (model) async {
@@ -90,98 +98,17 @@ class _AccountsPageState extends State<AccountsPage> {
                                         account: e,
                                       )));
                             },
-                            child: Slidable(
-                              key: Key(e.name!),
-                              startActionPane: ActionPane(
-                                // A motion is a widget used to control how the pane animates.
-                                motion: const ScrollMotion(),
-
-                                // A pane can dismiss the Slidable.
-                                dismissible:
-                                    DismissiblePane(onDismissed: () {
-                                      
-                                    }),
-
-                                // All actions are defined in the children parameter.
-                                children: [
-                                  // A SlidableAction can have an icon and/or a label.
-                                  SlidableAction(
-                                    onPressed: (context) async {
-                                      await model.deleteAccount(e.sId!);
-                                    },
-                                    backgroundColor: Color(0xFFFE4A49),
-                                    //     foregroundColor: Colors.white,
-                                    icon: Icons.delete,
-                                    label: 'Delete',
-                                  ),
-                                  SlidableAction(
-                                    onPressed: doNothing,
-                                    backgroundColor: Color(0xFF21B7CA),
-                                    //    foregroundColor: Colors.white,
-                                    icon: Icons.share,
-                                    label: 'Share',
-                                  ),
-                                ],
-                              ),
-                              endActionPane: ActionPane(
-                                // A motion is a widget used to control how the pane animates.
-                                motion: const ScrollMotion(),
-
-                                // A pane can dismiss the Slidable.
-                                dismissible:
-                                    DismissiblePane(onDismissed: () {}),
-
-                                // All actions are defined in the children parameter.
-                                children: [
-                                  // A SlidableAction can have an icon and/or a label.
-                                  SlidableAction(
-                                    onPressed: (context) async {
-                                      await model.deleteAccount(e.sId!);
-                                    },
-                                    backgroundColor: Color(0xFFFE4A49),
-                                    //     foregroundColor: Colors.white,
-                                    icon: Icons.delete,
-                                    label: 'Delete',
-                                  ),
-                                  SlidableAction(
-                                    onPressed: doNothing,
-                                    backgroundColor: Color(0xFF21B7CA),
-                                    //    foregroundColor: Colors.white,
-                                    icon: Icons.share,
-                                    label: 'Share',
-                                  ),
-                                ],
-                              ),
-                              child: Container(
-                                height: 80,
-                                child: Card(
-                                  elevation: 1.0,
-                                  child: ListTile(
-                                    title: Text(
-                                      e.name!,
-                                      style: TextStyle(color: Colors.black),
-                                    ),
+                            child: Container(
+                              height: 80,
+                              child: Card(
+                                elevation: 2.0,
+                                child: ListTile(
+                                  title: Text(
+                                    e.name!,
+                                    style: TextStyle(color: Colors.black),
                                   ),
                                 ),
                               ),
-
-                              //  Container(
-                              //   height: 80,
-                              //   margin: EdgeInsets.all(10.0),
-                              //   child: Card(
-                              //     elevation: 1.0,
-                              //     child: Container(
-                              //       height: 40,
-                              //       decoration: BoxDecoration(
-                              //           color: Colors.white, boxShadow: []),
-                              //       padding: EdgeInsets.all(8.5),
-                              //       child: Text(
-                              //         e.name!,
-                              //         style: TextStyle(color: Colors.black),
-                              //       ),
-                              //     ),
-                              //   ),
-                              // ),
                             ),
                           ))
                       .toList(),

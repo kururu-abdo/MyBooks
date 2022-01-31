@@ -16,7 +16,7 @@ import 'package:mybooks/core/utils/failure.dart';
 
 class Api {
   static const endpoint = 'http://192.168.8.172:7000';
-  //  'https://heroku-kururu-mybooks.herokuapp.com';
+  //'https://heroku-kururu-mybooks.herokuapp.com';
 
   static Future<Either<User, Failure>> SignUser(NewUser user) async {
     try {
@@ -865,6 +865,75 @@ class Api {
         List<PaymentTrans> accounts =
             body.map((e) => PaymentTrans.fromJson(e)).toList();
         return Left(accounts);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" غير مصرح لك بإجراء العملية "));
+      } else if (res.statusCode == 404) {
+        return Right(CustomUnauthorizedException(" هذا الحساب موجود بالفعل  "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<dynamic, Failure>> getReminingBalance(
+      String trans) async {
+    try {
+      var res = await http
+          .get(
+            Uri.parse(endpoint + "/payment/remain?transID=${trans}"),
+          )
+          .timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        return Left(json.decode(res.body)['amount']);
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" غير مصرح لك بإجراء العملية "));
+      } else if (res.statusCode == 404) {
+        return Right(CustomUnauthorizedException(" هذا الحساب موجود بالفعل  "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<dynamic, Failure>> updateStatus(
+      String trans, String status) async {
+    try {
+      var res = await http.post(Uri.parse(endpoint + "/transaction/mark-done"),
+          body: <String, dynamic>{
+            "transId": trans,
+            "status": status
+          }).timeout(Duration(seconds: 12));
+
+      if (res.statusCode == 200) {
+        print(json.decode(res.body));
+        return Left(json.decode(res.body));
       } else if (res.statusCode == 500 ||
           res.statusCode == 501 ||
           res.statusCode == 503) {

@@ -7,8 +7,14 @@ class TransactionWidget extends StatelessWidget {
   final String? date;
   final String? amount;
   final bool? isIn;
+  final bool? isDone;
   const TransactionWidget(
-      {Key? key, this.account, this.date, this.amount, this.isIn})
+      {Key? key,
+      this.account,
+      this.date,
+      this.amount,
+      this.isIn,
+      this.isDone = false})
       : super(key: key);
 
   @override
@@ -33,16 +39,29 @@ class TransactionWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(account!),
+              Text(account!,
+                  style: TextStyle(
+                      decoration: isDone!
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none)),
               Text(
                 amount!,
-                style: TextStyle(color: isIn! ? Colors.green : Colors.red),
+                style: TextStyle(
+                    color: isIn! ? Colors.green : Colors.red,
+                    decoration: isDone!
+                        ? TextDecoration.lineThrough
+                        : TextDecoration.none),
               )
             ],
           ),
-          Text(getFormattedDate(
-            date!,
-          ))
+          Text(
+            getFormattedDate(
+              date!,
+            ),
+            style: TextStyle(
+                decoration:
+                    isDone! ? TextDecoration.lineThrough : TextDecoration.none),
+          )
         ],
       ),
     );

@@ -1,21 +1,169 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mybooks/core/services/sharedPrefs_service.dart';
+import 'package:mybooks/core/utils/colors.dart';
 import 'package:mybooks/core/utils/helper.dart';
 import 'package:mybooks/core/utils/routes/router.dart';
+import 'package:mybooks/core/utils/sizes.dart';
 import 'package:mybooks/core/utils/styles.dart';
+import 'package:mybooks/core/viewmodels/signup_viewmodel.dart';
 import 'package:mybooks/core/viewmodels/user_viewmodel.dart';
 import 'package:mybooks/main.dart';
 import 'package:mybooks/ui/widgets/circular_image_view.dart';
 import 'package:mybooks/ui/widgets/confimtaion_dialoge.dart';
 import 'package:stacked/stacked.dart';
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+class ProfilePage extends StatefulWidget {
+  ProfilePage({Key? key}) : super(key: key);
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage>
+    with TickerProviderStateMixin {
+  VoidCallback? _showPersBottomSheetCallBack;
+  AnimationController? controller;
+  Animation<Offset>? animation;
+  TextEditingController passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 900));
+
+    animation = Tween<Offset>(
+      begin: const Offset(0.0, 0.0),
+      end: const Offset(0.5, 0.0),
+    ).animate(controller!);
+    _showPersBottomSheetCallBack = _showPersistentBottomSheet;
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    controller!.dispose();
+  }
+
+  final _scaffoldKey = new GlobalKey<ScaffoldState>();
+  void _showPersistentBottomSheet() {
+    setState(() {
+      _showPersBottomSheetCallBack = null;
+    });
+    _scaffoldKey.currentState!
+        .showBottomSheet((context) {
+          return new Container(
+            height: 300.0,
+            color: Colors.green,
+            child: new Center(
+              child: new Text("Persistent BottomSheet",
+                  textScaleFactor: 2,
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          );
+        })
+        .closed
+        .whenComplete(() {
+          if (mounted) {
+            //Anim
+            controller!.forward();
+            setState(() {
+              _showPersBottomSheetCallBack = _showPersistentBottomSheet;
+            });
+          }
+        });
+  }
+  var _formKey = GlobalKey<FormState>();
+
+  void _showModalSheet() {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          // ignore: unnecessary_new
+          return new Container(
+            height: 300.0,
+            color: Colors.green,
+            child:ViewModelBuilder<SignUpViewModel>.reactive(
+          viewModelBuilder: () => SignUpViewModel(),
+          builder: (context, model, child)=> Form(
+                key: _formKey,
+                child: Column(children: [
+                   Container(
+                                  padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                  margin: EdgeInsets.only(bottom: 10),
+                                  child: TextFormField(
+                                    obscureText: model.visibility ? true : false,
+                                    controller: passwordController,
+                                    validator: (str) {
+                                      if (str == null || str.length < 1) {
+                                        return "هذا الحقل مطلوب";
+                                      } else {
+                                        return null;
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        labelText: 'كلمة المرور',
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: const BorderSide(
+                                              color: Colors.green, width: 2.0),
+                                        ),
+                                        labelStyle: TextStyle(color: Colors.green),
+                                        suffixIcon: IconButton(
+                                            onPressed: () {
+                                              print("Pressed");
+                                              model
+                                                  .setVisibility(!model.visibility);
+                                            },
+                                            icon: Icon(
+                                              model.visibility
+                                                  ? Icons.visibility_off
+                                                  : Icons.visibility,
+                                              color: Colors.black,
+                                            ))),
+                                  ),
+                                ),
+                                model.isLoading
+                                    ? Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 1.5,
+                                          color: inColor,
+                                        ),
+                                      )
+                                    : Container(
+                                        height: 50,
+                                        width: double.infinity,
+                                        padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                                defaultRadius)),
+                                        child: RaisedButton(
+                                          textColor: Colors.white,
+                                          color: Colors.green,
+                                          child: Text('تسجيل الحساب'),
+                                          onPressed: () async {
+                                            if (_formKey.currentState!.validate()) {
+                                           
+              
+                                        //      await model.register(user);
+                                            }
+                                          },
+                                        )),
+                ],),
+              ),
+            )
+          );
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar:
           AppBar(backgroundColor: Colors.transparent, elevation: 0.0, actions: [
         RaisedButton.icon(
@@ -82,7 +230,7 @@ class ProfilePage extends StatelessWidget {
                     margin: EdgeInsets.all(10.0),
                     elevation: 0.5,
                     child: ListTile(
-                      onTap: () {},
+                      onTap: _showModalSheet,
                       title: Text('تغيير كلمة المرور'),
                       subtitle: Text("*********"),
                     ),
@@ -91,12 +239,18 @@ class ProfilePage extends StatelessWidget {
               );
             }
           }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          nav.push(EditProfileRouter());
-        },
-        child: Icon(Icons.edit, color: Colors.white),
-        backgroundColor: Colors.green,
+      floatingActionButton: Visibility(
+        visible: MediaQuery.of(context).padding.bottom == 0,
+        child: SlideTransition(
+          position: animation!,
+          child: FloatingActionButton(
+            onPressed: () {
+              nav.push(EditProfileRouter());
+            },
+            child: Icon(Icons.edit, color: Colors.white),
+            backgroundColor: Colors.green,
+          ),
+        ),
       ),
     );
   }

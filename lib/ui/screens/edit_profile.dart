@@ -25,7 +25,7 @@ class _EditProfileState extends State<EditProfile> {
   Widget build(BuildContext context) {
     return ViewModelBuilder<UserViewModel>.reactive(
         onModelReady: (model) async {
-                       model.initSocket();
+          model.initSocket();
 
           await model.fetchUser(sharedPrefs.getUser().sId!);
           nameController.text = model.user.name!;
@@ -105,7 +105,7 @@ class _EditProfileState extends State<EditProfile> {
                               labelStyle: TextStyle(color: Colors.green),
                             ),
                             validator: (str) {
-                              var rg = RegExp(r"^[0]{1}[1-9]{9}$");
+                              var rg = RegExp(r"^[0]{1}[0-9]{9}$");
                               if (!rg.hasMatch(str!)) {
                                 return "رقم الهانف غير صالح";
                               }

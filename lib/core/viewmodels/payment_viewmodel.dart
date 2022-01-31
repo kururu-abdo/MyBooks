@@ -1,5 +1,6 @@
 import 'package:mybooks/core/model/payment_trans.dart';
 import 'package:mybooks/core/services/api.dart';
+import 'package:mybooks/core/services/sharedPrefs_service.dart';
 import 'package:mybooks/core/utils/failure.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:stacked/stacked.dart';
@@ -23,8 +24,8 @@ class PaymentViewModel extends BaseViewModel {
       // socket!.on('typing', handleTyping);
       // socket!.on('message', handleMessage);
       socket!.on('update-account', updateAccount);
-      socket!.on('delete-account', deleteAccount2);
-      socket!.on('accounts', updateAccount);
+      socket!.on('remains', deleteAccount2);
+      socket!.on('payments', updateAccount);
       // socket!.on('onAcccounts', onAcccounts);
       // socket!.on('accounts-trans', accountTrans);
       // socket!.on('add-account', addAccount);
@@ -39,8 +40,17 @@ class PaymentViewModel extends BaseViewModel {
     }
   }
 
-  void deleteAccount2(data) {}
-  void updateAccount(data) {}
+  void deleteAccount2(data) {
+    var result = data['amount'];
+    
+  }
+
+  void updateAccount(data) {
+    Iterable I = data;
+    List<PaymentTrans> paymentTrans =
+        I.map((e) => PaymentTrans.fromJson(e)).toList();
+    _setTrans(paymentTrans);
+  }
 
   List<PaymentTrans> _trans = [];
   List<PaymentTrans> get trans => _trans;
@@ -75,6 +85,9 @@ class PaymentViewModel extends BaseViewModel {
     _setLoading(true);
     var result = await Api.addPaymentTransaction(trans, amount);
     result.fold((done) {
+      emit("payment", <String, dynamic>{"transId": trans});
+
+      // sharedPrefs.getUser().sId!
       _setLoading(false);
     }, (error) {
       _setLoading(false);

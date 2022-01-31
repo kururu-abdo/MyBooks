@@ -3,6 +3,7 @@ import 'package:mybooks/core/enums/view_state.dart';
 import 'package:mybooks/core/model/transaction.dart';
 import 'package:mybooks/core/model/transaction_type.dart';
 import 'package:mybooks/core/services/api.dart';
+import 'package:mybooks/core/services/sharedPrefs_service.dart';
 import 'package:mybooks/core/services/toast_services.dart';
 import 'package:mybooks/core/utils/failure.dart';
 import 'package:socket_io_client/socket_io_client.dart';
@@ -110,7 +111,7 @@ class LastTransactionViewModel extends BaseViewModel {
   // addTransaction() async {
   //   _setState(ViewState.Busy);
   // }
- deleteTransaction(String uid) async {
+  deleteTransaction(String uid) async {
     _setLoading(true);
     _setState(ViewState.Busy);
     var result = await Api.deleteTransaction(uid);
@@ -125,6 +126,7 @@ class LastTransactionViewModel extends BaseViewModel {
       _setState(ViewState.Idle);
       _setLoading(false);
       nav.pop();
+      emit("refresh", <String, dynamic>{"uid": sharedPrefs.getUser().sId!});
     }, (error) {
       ToastServices.displayToast(error.message, type: ToastType.Error);
       _setLoading(false);
@@ -132,6 +134,7 @@ class LastTransactionViewModel extends BaseViewModel {
       _setFailure(error);
     });
   }
+
   fetchLastTransactions(String uid) async {
     _setLoading(true);
     _setState(ViewState.Busy);

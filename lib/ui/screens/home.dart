@@ -87,11 +87,12 @@ class _HomeState extends State<Home> {
           //
           //alterntivly you could use a global key
           return Scaffold(
+              resizeToAvoidBottomInset: false,
               body: FadeTransition(
-            opacity: animation,
-            // the passed child is techinaclly our animated selected-tab page
-            child: child,
-          ));
+                opacity: animation,
+                // the passed child is techinaclly our animated selected-tab page
+                child: child,
+              ));
         },
         bottomNavigationBuilder: (_, tabsRouter) {
           return SalomonBottomBar(
@@ -105,7 +106,7 @@ class _HomeState extends State<Home> {
               SalomonBottomBarItem(
                 //     selectedColor: Colors.amberAccent,
                 icon: const Icon(
-                  Icons.home,
+                  Icons.home_outlined,
                   size: 30,
                 ),
                 title: const Text('الرئيسية'),
@@ -113,7 +114,7 @@ class _HomeState extends State<Home> {
               SalomonBottomBarItem(
                 //     selectedColor: Colors.amberAccent,
                 icon: const Icon(
-                  Icons.show_chart,
+                  Icons.swap_horiz_outlined,
                   size: 30,
                 ),
                 title: const Text('ملخص'),
@@ -121,7 +122,7 @@ class _HomeState extends State<Home> {
               SalomonBottomBarItem(
                 //     selectedColor: Colors.amberAccent,
                 icon: const Icon(
-                  Icons.account_balance_wallet_sharp,
+                  Icons.account_balance_wallet_outlined,
                   size: 30,
                 ),
                 title: const Text('الحسابات'),
@@ -129,7 +130,7 @@ class _HomeState extends State<Home> {
               SalomonBottomBarItem(
                 //      selectedColor: Colors.blue[200],
                 icon: const Icon(
-                  Icons.face,
+                  Icons.settings_outlined,
                   size: 30,
                 ),
                 title: const Text('الملف الشخصي'),
@@ -147,6 +148,10 @@ class _HomeState extends State<Home> {
         //     ],
         //   ),
         // ),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () {},
+        // ),
+        // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomSheet:
             Visibility(visible: _showButtomSheet, child: DrawerIcomns()),
       ),

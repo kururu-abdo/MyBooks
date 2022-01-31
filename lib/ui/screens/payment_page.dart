@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mybooks/core/model/transaction.dart';
 import 'package:mybooks/core/utils/helper.dart';
@@ -8,7 +10,8 @@ import 'package:stacked/stacked.dart';
 
 class PaymentPage extends StatefulWidget {
   final Transaction? trans;
-  const PaymentPage({Key? key, this.trans}) : super(key: key);
+  final double? amount;
+  const PaymentPage({Key? key, this.trans, this.amount}) : super(key: key);
 
   @override
   _PaymentPageState createState() => _PaymentPageState();
@@ -48,7 +51,7 @@ class _PaymentPageState extends State<PaymentPage> {
                           decoration: InputDecoration(
                               border: OutlineInputBorder(
                                   borderRadius:
-                                      BorderRadius.all(Radius.circular(25.0)),
+                                      BorderRadius.all(Radius.circular(10.0)),
                                   borderSide: BorderSide(
                                       width: 0, style: BorderStyle.none)),
                               hintText: "0 ج.س",
@@ -61,8 +64,7 @@ class _PaymentPageState extends State<PaymentPage> {
                           validator: (str) {
                             if (str == "" || str!.length < 1) {
                               return "هذا الحقل مطلوب";
-                            } else if (double.parse(str) >
-                                double.parse(widget.trans!.amount.toString())) {
+                            } else if (double.parse(str) > widget.amount!) {
                               return "المبلغ المدخل أكبر من مبلغ العملية";
                             } else {
                               return null;
@@ -71,6 +73,7 @@ class _PaymentPageState extends State<PaymentPage> {
                       SizedBox(height: 20.0),
                       InkWell(
                         onTap: () async {
+                          log("AMOUNT:" + widget.amount!.toString());
                           if (_formKey.currentState!.validate()) {
                             print(widget.trans!.sId!);
                             await model.addPayment(widget.trans!.sId!,

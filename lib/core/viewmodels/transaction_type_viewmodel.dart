@@ -41,7 +41,7 @@ class TransactionTypeViewModel extends BaseViewModel {
       // socket!.on('message', handleMessage);
       // socket!.on('onAcccounts', onAcccounts);
       // socket!.on('accounts-trans', accountTrans);
-      // socket!.on('add-account', addAccount);
+      socket!.on('remains', updateRemain);
       // socket!.on('delete-account', deleteAccount);
       // socket!.on('delete-trans', deleteTrans);
       // socket!.on('update-account', updateAccount);
@@ -53,7 +53,12 @@ class TransactionTypeViewModel extends BaseViewModel {
     }
   }
 
+   updateRemain(data){
 
+    var result = data['amount'];
+    
+  
+   }
 
   void emit(String event, data) {
     socket!.emit(event, data);

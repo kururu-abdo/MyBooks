@@ -55,13 +55,10 @@ class _AddAccountState extends State<AddAccount> {
                     child: TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: InputBorder.none,
+                        filled: true,
                         labelText: 'اسم صاحب الحساب',
                         labelStyle: TextStyle(color: Colors.green),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              const BorderSide(color: Colors.green, width: 2.0),
-                        ),
                       ),
                       validator: (str) {
                         if (str == null || str.length < 1) {

@@ -69,19 +69,13 @@ class _TransactionListState extends State<TransactionList> {
                               // A SlidableAction can have an icon and/or a label.
                               SlidableAction(
                                 onPressed: (context) async {
-                                
-                                    confirmationDialog(
-                                        context, 'هل تريد حذف العملية؟',
-                                        onOkBtnPressed: () {
-                                      model.deleteTransaction(
-                                         trans.sId!);
-                                    }, onCancelBtnPressed: () {
-                                      nav.pop();
-                                    });
-                                 
-                                 
-                                 
-                                 
+                                  confirmationDialog(
+                                      context, 'هل تريد حذف العملية؟',
+                                      onOkBtnPressed: () {
+                                    model.deleteTransaction(trans.sId!);
+                                  }, onCancelBtnPressed: () {
+                                    nav.pop();
+                                  });
                                 },
                                 backgroundColor: Color(0xFFFE4A49),
                                 //     foregroundColor: Colors.white,
@@ -133,6 +127,7 @@ class _TransactionListState extends State<TransactionList> {
                             amount: "${trans.amount} ج.س",
                             isIn: model.isIn(trans),
                             date: trans.date,
+                            isDone: trans.status == 'done',
                           ),
                         ),
                       )

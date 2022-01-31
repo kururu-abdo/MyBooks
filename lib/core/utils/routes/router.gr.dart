@@ -35,7 +35,8 @@ class _$AppRouter extends RootStackRouter {
           orElse: () => const PaymentPageRouterArgs());
       return MaterialPageX<dynamic>(
           routeData: routeData,
-          child: PaymentPage(key: args.key, trans: args.trans));
+          child: PaymentPage(
+              key: args.key, trans: args.trans, amount: args.amount));
     },
     EditTransRouter.name: (routeData) {
       final args = routeData.argsAs<EditTransRouterArgs>(
@@ -72,7 +73,7 @@ class _$AppRouter extends RootStackRouter {
     },
     ProfilePageRouter.name: (routeData) {
       return MaterialPageX<dynamic>(
-          routeData: routeData, child: const ProfilePage());
+          routeData: routeData, child:  ProfilePage());
     }
   };
 
@@ -135,24 +136,27 @@ class AllTransactionsRouter extends PageRouteInfo<void> {
 /// generated route for
 /// [PaymentPage]
 class PaymentPageRouter extends PageRouteInfo<PaymentPageRouterArgs> {
-  PaymentPageRouter({Key? key, Transaction? trans})
+  PaymentPageRouter({Key? key, Transaction? trans, double? amount})
       : super(PaymentPageRouter.name,
             path: '/payment',
-            args: PaymentPageRouterArgs(key: key, trans: trans));
+            args:
+                PaymentPageRouterArgs(key: key, trans: trans, amount: amount));
 
   static const String name = 'PaymentPageRouter';
 }
 
 class PaymentPageRouterArgs {
-  const PaymentPageRouterArgs({this.key, this.trans});
+  const PaymentPageRouterArgs({this.key, this.trans, this.amount});
 
   final Key? key;
 
   final Transaction? trans;
 
+  final double? amount;
+
   @override
   String toString() {
-    return 'PaymentPageRouterArgs{key: $key, trans: $trans}';
+    return 'PaymentPageRouterArgs{key: $key, trans: $trans, amount: $amount}';
   }
 }
 

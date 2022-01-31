@@ -48,15 +48,40 @@ class _UserTransactionState extends State<EditTransaction> {
       ),
       body: ViewModelBuilder<TransactionViewModel>.reactive(
           viewModelBuilder: () => TransactionViewModel(),
-          onModelReady: (model) {
+          onModelReady: (model) async {
+            await model.getReminingBalce(widget.transaction!.sId!);
             model.initSocket();
           },
           builder: (context, model, child) => Column(children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Text("المبلغ المتبفي"),
-                    Text("23 ج .س"),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text("المبلغ المتبفي"),
+                        Text("${model.remainingBalance} ج .س"),
+                      ],
+                    ),
+                    SizedBox(
+                      width: 150,
+                      child: Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: CheckboxListTile(
+                          title: Text("تم السداد"), //    <-- label
+                          value: widget.transaction!.status == 'done',
+                          onChanged: (newValue) async {
+                            if (newValue!) {
+                              await model.updateTransactionStatus(
+                                  widget.transaction!.sId!, "done");
+                            } else {
+                              await model.updateTransactionStatus(
+                                  widget.transaction!.sId!, "waiting");
+                            }
+                          },
+                        ),
+                      ),
+                    )
                   ],
                 ),
                 SizedBox(height: 20.0),
@@ -70,146 +95,156 @@ class _UserTransactionState extends State<EditTransaction> {
 
                     //     borderRadius: BorderRadius.circular(8)),
 
-                    child: Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            Text(
-                              " تعديل العملية",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(height: 20.0),
-                            ViewModelBuilder<TransactionTypeViewModel>.reactive(
-                                viewModelBuilder: () =>
-                                    TransactionTypeViewModel(),
-                                onModelReady: (model2) async {
-                                  await model2.fetchTypes();
-                                  model2.initSocket();
-                                  model.setTransactionType(
-                                      widget.transaction!.type!);
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              Text(
+                                " تعديل العملية",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 20.0),
+                              ViewModelBuilder<
+                                      TransactionTypeViewModel>.reactive(
+                                  viewModelBuilder: () =>
+                                      TransactionTypeViewModel(),
+                                  onModelReady: (model2) async {
+                                    await model2.fetchTypes();
+                                    model2.initSocket();
+                                    model.setTransactionType(
+                                        widget.transaction!.type!);
+                                  },
+                                  builder: (context, model2, child) {
+                                    if (model2.isLoading) {
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 1.2,
+                                          color: Colors.green,
+                                        ),
+                                      );
+                                    } else {
+                                      return DropdownButtonFormField<
+                                              TransactionType>(
+                                          icon: Icon(
+                                            Icons.keyboard_arrow_down,
+                                            color: Colors.green,
+                                          ),
+
+                                          //  value: model.transaction_type,
+
+                                          decoration: InputDecoration(
+                                              border: InputBorder.none,
+                                              filled: true,
+                                              hintText: 'نوع العملية'),
+                                          items: model2.transaction_types
+                                              .map((TransactionType e) =>
+                                                  DropdownMenuItem(
+                                                      value: e,
+                                                      child: Text(e.typeName!)))
+                                              .toList(),
+                                          onChanged: (e) {
+                                            model.setTransactionType(e!);
+                                          });
+                                    }
+                                  }),
+                              SizedBox(height: 10.0),
+                              TextFormField(
+                                controller: _priceController,
+                                keyboardType: TextInputType.number,
+                                decoration: InputDecoration(
+                                    hintText: "0 ج.س",
+                                    filled: true,
+                                    border: InputBorder.none,
+                                    suffixIcon: Icon(
+                                      Icons.attach_money_outlined,
+                                      color: Colors.green,
+                                    )),
+                              ),
+                              SizedBox(height: 20.0),
+                              InkWell(
+                                onTap: () async {
+                                  await model.updateTransaction(
+                                      widget.transaction!.sId!,
+                                      model.transaction_type.sId!,
+                                      double.parse(_priceController.text));
                                 },
-                                builder: (context, model2, child) {
-                                  if (model2.isLoading) {
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 1.2,
-                                        color: Colors.green,
-                                      ),
-                                    );
-                                  } else {
-                                    return DropdownButtonFormField<
-                                            TransactionType>(
-                                        icon: Icon(
-                                          Icons.keyboard_arrow_down,
-                                          color: Colors.green,
-                                        ),
+                                child: model.isLoading
+                                    ? Center(
+                                        child: loadingWidget,
+                                      )
+                                    : Container(
+                                        width: double.infinity,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                            color: Colors.green,
+                                            borderRadius:
+                                                BorderRadius.circular(10)),
 
-                                        //  value: model.transaction_type,
+                                        // padding:
 
-                                        decoration: InputDecoration(
-                                            filled: true,
-                                            hintText: 'نوع العملية'),
-                                        items: model2.transaction_types
-                                            .map((TransactionType e) =>
-                                                DropdownMenuItem(
-                                                    value: e,
-                                                    child: Text(e.typeName!)))
-                                            .toList(),
-                                        onChanged: (e) {
-                                          model.setTransactionType(e!);
-                                        });
-                                  }
-                                }),
-                            SizedBox(height: 10.0),
-                            TextFormField(
-                              controller: _priceController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                  hintText: "0 ج.س",
-                                  filled: true,
-                                  suffixIcon: Icon(
-                                    Icons.attach_money_outlined,
-                                    color: Colors.green,
-                                  )),
-                            ),
-                            SizedBox(height: 20.0),
-                            InkWell(
-                              onTap: () async {
-                                await model.updateTransaction(
-                                    widget.transaction!.sId!,
-                                    model.transaction_type.sId!,
-                                    double.parse(_priceController.text));
-                              },
-                              child: model.isLoading
-                                  ? Center(
-                                      child: loadingWidget,
-                                    )
-                                  : Container(
-                                      width: double.infinity,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                          color: Colors.green,
-                                          borderRadius:
-                                              BorderRadius.circular(10)),
+                                        //     EdgeInsets.fromLTRB(10, 0, 10, 0),
 
-                                      // padding:
+                                        child: Center(
+                                          child: Text(
+                                            'تحديث ',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        )),
+                              ),
+                              SizedBox(height: 20.0),
+                              InkWell(
+                                onTap: () async {
+                                  print(model.remainingBalance.runtimeType);
 
-                                      //     EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  nav.push(PaymentPageRouter(
+                                      amount: model.remainingBalance,
+                                      trans: widget.transaction));
+                                },
+                                child:
+                                    // model.isLoading
+                                    //     ? Center(
+                                    //         child: loadingWidget,
+                                    //       )
+                                    //     :
 
-                                      child: Center(
-                                        child: Text(
-                                          'تحديث ',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      )),
-                            ),
-                            SizedBox(height: 20.0),
-                            InkWell(
-                              onTap: () async {
-                                nav.push(PaymentPageRouter(
-                                    trans: widget.transaction));
-                              },
-                              child:
-                                  // model.isLoading
-                                  //     ? Center(
-                                  //         child: loadingWidget,
-                                  //       )
-                                  //     :
+                                    Container(
+                                        width: double.infinity,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                            color: Colors.grey,
+                                            borderRadius:
+                                                BorderRadius.circular(10)),
 
-                                  Container(
-                                      width: double.infinity,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey,
-                                          borderRadius:
-                                              BorderRadius.circular(10)),
+                                        // padding:
 
-                                      // padding:
+                                        //     EdgeInsets.fromLTRB(10, 0, 10, 0),
 
-                                      //     EdgeInsets.fromLTRB(10, 0, 10, 0),
-
-                                      child: Center(
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              'سداد ',
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                            SizedBox(width: 10.0),
-                                            Image.asset(
-                                              'assets/images/done.png',
-                                              height: 20,
-                                              width: 20,
-                                            )
-                                          ],
-                                        ),
-                                      )),
-                            ),
-                          ],
-                        ))),
+                                        child: Center(
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                'سداد ',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                              SizedBox(width: 10.0),
+                                              Image.asset(
+                                                'assets/images/done.png',
+                                                height: 20,
+                                                width: 20,
+                                              )
+                                            ],
+                                          ),
+                                        )),
+                              ),
+                            ],
+                          )),
+                    )),
                 SizedBox(height: 10.0),
                 Center(
                   child: Text(

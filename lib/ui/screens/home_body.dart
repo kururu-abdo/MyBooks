@@ -20,24 +20,22 @@ class _HomeBodyState extends State<HomeBody> {
       });
     }
 
-    return Container(
-      child: Column(
-        children: [
-          Header(
-            onMenueIconPressed: updateBottomSheetState,
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          LastProcessLable(),
-          SizedBox(
-            height: 15,
-          ),
+    return Column(
+      children: [
+        Header(
+          onMenueIconPressed: updateBottomSheetState,
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        LastProcessLable(),
+        SizedBox(
+          height: 15,
+        ),
 
-          //   TransactionListHomeMiniTrancationsShimmer()
-          TransactionList()
-        ],
-      ),
+        //   TransactionListHomeMiniTrancationsShimmer()
+        TransactionList()
+      ],
     );
   }
 }

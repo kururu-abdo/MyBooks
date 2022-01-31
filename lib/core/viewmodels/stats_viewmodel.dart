@@ -6,6 +6,7 @@ import 'package:stacked/stacked.dart';
 
 class StatsViewmodel extends BaseViewModel {
   Socket? socket;
+
   void initSocket() {
     try {
       // Configure socket transports must be sepecified
@@ -24,7 +25,7 @@ class StatsViewmodel extends BaseViewModel {
       socket!.on('in-amount', updateInAMount);
       socket!.on('out-amount', updateOutAmount);
       socket!.on('month-amount', upadateMonthAmount);
-      socket!.on('day-amount', upadateMonthAmount);
+      socket!.on('day-amount', upadateDayAmount);
       socket!.on('week-amount', upadateWeekAmount);
 
       // socket!.on('delete-account', deleteAccount);
@@ -39,18 +40,22 @@ class StatsViewmodel extends BaseViewModel {
   }
 
   void upadateWeekAmount(data) {
+    print(data);
     _setWeeklyAmount(data);
   }
 
   void upadateDayAmount(data) {
+    print(data);
     _setDailAmount(data);
   }
 
   void upadateMonthAmount(data) {
+    print(data);
     _setmonthlAmount(data);
   }
 
   void updateOutAmount(data) {
+    print(data);
     _setnoutAmount(data);
   }
 
@@ -59,10 +64,12 @@ class StatsViewmodel extends BaseViewModel {
   }
 
   void updateNetAmount(data) {
+    print(data);
     _setnoutAmount(data);
   }
 
   void emit(String event, data) {
+    print(data);
     socket!.emit(event, data);
   }
 

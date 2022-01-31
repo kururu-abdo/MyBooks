@@ -36,6 +36,7 @@ class TransactionViewModel extends BaseViewModel {
       // socket!.on('typing', handleTyping);
       // socket!.on('message', handleMessage);
       socket!.on('user-trans', updateTrans);
+      socket!.on('remains', updateRemain);
       // socket!.on('accounts-trans', accountTrans);
       // socket!.on('add-account', addAccount);
       // socket!.on('delete-account', deleteAccount);
@@ -49,11 +50,25 @@ class TransactionViewModel extends BaseViewModel {
     }
   }
 
+  double _remainingBalance = 0.0;
+  double get remainingBalance => _remainingBalance;
   updateTrans(data) {
     Iterable I = data;
     List<Transaction> trans = I.map((e) => Transaction.fromJson(e)).toList();
 
     _setTransactions(trans);
+  }
+
+  updateRemain(data) {
+    print(data);
+    var result = data['amount'];
+    updateReminingBalance(result);
+  }
+
+  updateReminingBalance(dynamic amount) {
+    _remainingBalance = double.parse(amount.toString());
+
+    notifyListeners();
   }
 
   void emit(String event, data) {
@@ -130,8 +145,10 @@ class TransactionViewModel extends BaseViewModel {
       // locator.get<AppRouter>().push(HomeRouter(), onFailure: (failure) {
       //   ToastServices.displayToast(failure.toString(), type: ToastType.Error);
       // });
+
       emit(
-          "new-transaction", <String, dynamic>{"uid": uid, "account": account});
+          "refresh-account", <String, dynamic>{"uid": uid, "account": account});
+      emit("refresh", <String, dynamic>{"uid": uid});
       _setLoading(false);
     }, (error) {
       ToastServices.displayToast(error.message, type: ToastType.Error);
@@ -148,8 +165,31 @@ class TransactionViewModel extends BaseViewModel {
       _setLoading(false);
       ToastServices.displayToast("تمت تحديث  العملية بنجاح",
           type: ToastType.Success);
+      emit("refresh", <String, dynamic>{"uid": sharedPrefs.getUser().sId!});
+
       emit('update-transaction',
           <String, dynamic>{'uid': sharedPrefs.getUser().sId!});
+      // locator.get<AppRouter>().push(HomeRouter(), onFailure: (failure) {
+      //   ToastServices.displayToast(failure.toString(), type: ToastType.Error);
+    }, (error) {
+      ToastServices.displayToast(error.message, type: ToastType.Error);
+      _setLoading(false);
+      _setFailure(error);
+    });
+  }
+
+  updateTransactionStatus(String trans_id, String status) async {
+    _setLoading(true);
+    var result = await Api.updateStatus(trans_id, status);
+    result.fold((l) {
+      _setLoading(false);
+      _setLoading(false);
+      ToastServices.displayToast("تمت تحديث  العملية بنجاح",
+          type: ToastType.Success);
+      emit("refresh", <String, dynamic>{"uid": sharedPrefs.getUser().sId!});
+
+      // emit('update-transaction',
+      //     <String, dynamic>{'uid': sharedPrefs.getUser().sId!});
       // locator.get<AppRouter>().push(HomeRouter(), onFailure: (failure) {
       //   ToastServices.displayToast(failure.toString(), type: ToastType.Error);
     }, (error) {
@@ -163,6 +203,7 @@ class TransactionViewModel extends BaseViewModel {
   dynamic get accountNetAmount => _accountNetAmount;
   _setAccountNetAmount(dynamic amount) {
     _accountNetAmount = amount;
+
     notifyListeners();
   }
 
@@ -221,6 +262,28 @@ class TransactionViewModel extends BaseViewModel {
       _setState(ViewState.Idle);
       _setLoading(false);
       nav.pop();
+      emit("refresh", <String, dynamic>{"uid": sharedPrefs.getUser().sId!});
+    }, (error) {
+      ToastServices.displayToast(error.message, type: ToastType.Error);
+      _setLoading(false);
+      _setState(ViewState.Error);
+      _setFailure(error);
+    });
+  }
+
+  getReminingBalce(String transId) async {
+    _setLoading(true);
+    _setState(ViewState.Busy);
+    var result = await Api.getReminingBalance(transId);
+
+    result.fold((l) {
+      // locator.get<AppRouter>().push(HomeRouter(), onFailure: (failure) {
+      //   ToastServices.displayToast(failure.toString(), type: ToastType.Error);
+      // });
+
+      _setState(ViewState.Idle);
+      _setLoading(false);
+      updateReminingBalance(l);
     }, (error) {
       ToastServices.displayToast(error.message, type: ToastType.Error);
       _setLoading(false);

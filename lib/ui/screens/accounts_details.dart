@@ -180,6 +180,7 @@ class _AcccountDetailsState extends State<AcccountDetails>
                                                 //  value: model.transaction_type,
                                                 decoration: InputDecoration(
                                                   filled: true,
+                                                  border: InputBorder.none,
                                                 ),
                                                 items: model2.transaction_types
                                                     .map((TransactionType e) =>
@@ -199,6 +200,7 @@ class _AcccountDetailsState extends State<AcccountDetails>
                                       keyboardType: TextInputType.number,
                                       decoration: InputDecoration(
                                           hintText: "0 ج.س",
+                                          border: InputBorder.none,
                                           filled: true,
                                           suffixIcon: Icon(
                                             Icons.attach_money_outlined,

@@ -157,8 +157,7 @@ class AccountViewModel extends BaseViewModel {
 
     result.fold((l) {
       _setLoading(false);
-      emit("update-account",
-          <String, dynamic>{"uid": sharedPrefs.getUser().sId});
+      emit("add-account", <String, dynamic>{"uid": sharedPrefs.getUser().sId!});
       ToastServices.displayToast("تمت إضافة الحساب بنجاح",
           type: ToastType.Success);
     }, (error) {
