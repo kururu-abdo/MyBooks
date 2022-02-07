@@ -26,7 +26,7 @@ class _ProfilePageState extends State<ProfilePage>
   AnimationController? controller;
   Animation<Offset>? animation;
   TextEditingController passwordController = TextEditingController();
-
+  bool isLoading = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -57,7 +57,6 @@ class _ProfilePageState extends State<ProfilePage>
         .showBottomSheet((context) {
           return new Container(
             height: 300.0,
-            color: Colors.green,
             child: new Center(
               child: new Text("Persistent BottomSheet",
                   textScaleFactor: 2,
@@ -77,6 +76,7 @@ class _ProfilePageState extends State<ProfilePage>
           }
         });
   }
+
   var _formKey = GlobalKey<FormState>();
 
   void _showModalSheet() {
@@ -85,78 +85,78 @@ class _ProfilePageState extends State<ProfilePage>
         builder: (builder) {
           // ignore: unnecessary_new
           return new Container(
-            height: 300.0,
-            color: Colors.green,
-            child:ViewModelBuilder<SignUpViewModel>.reactive(
-          viewModelBuilder: () => SignUpViewModel(),
-          builder: (context, model, child)=> Form(
-                key: _formKey,
-                child: Column(children: [
-                   Container(
-                                  padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                                  margin: EdgeInsets.only(bottom: 10),
-                                  child: TextFormField(
-                                    obscureText: model.visibility ? true : false,
-                                    controller: passwordController,
-                                    validator: (str) {
-                                      if (str == null || str.length < 1) {
-                                        return "هذا الحقل مطلوب";
-                                      } else {
-                                        return null;
-                                      }
-                                    },
-                                    decoration: InputDecoration(
-                                        border: OutlineInputBorder(),
-                                        labelText: 'كلمة المرور',
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: const BorderSide(
-                                              color: Colors.green, width: 2.0),
-                                        ),
-                                        labelStyle: TextStyle(color: Colors.green),
-                                        suffixIcon: IconButton(
-                                            onPressed: () {
-                                              print("Pressed");
-                                              model
-                                                  .setVisibility(!model.visibility);
-                                            },
-                                            icon: Icon(
-                                              model.visibility
-                                                  ? Icons.visibility_off
-                                                  : Icons.visibility,
-                                              color: Colors.black,
-                                            ))),
-                                  ),
-                                ),
-                                model.isLoading
-                                    ? Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 1.5,
-                                          color: inColor,
-                                        ),
-                                      )
-                                    : Container(
-                                        height: 50,
-                                        width: double.infinity,
-                                        padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                                defaultRadius)),
-                                        child: RaisedButton(
-                                          textColor: Colors.white,
-                                          color: Colors.green,
-                                          child: Text('تسجيل الحساب'),
-                                          onPressed: () async {
-                                            if (_formKey.currentState!.validate()) {
-                                           
-              
-                                        //      await model.register(user);
-                                            }
-                                          },
-                                        )),
-                ],),
-              ),
-            )
-          );
+              height: 300.0,
+              child: ViewModelBuilder<SignUpViewModel>.reactive(
+                viewModelBuilder: () => SignUpViewModel(),
+                builder: (context, model, child) => Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                        margin: EdgeInsets.only(bottom: 10),
+                        child: TextFormField(
+                          obscureText: model.visibility ? true : false,
+                          controller: passwordController,
+                          validator: (str) {
+                            if (str == null || str.length < 1) {
+                              return "هذا الحقل مطلوب";
+                            } else {
+                              return null;
+                            }
+                          },
+                          decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'كلمة المرور',
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                    color: Colors.green, width: 2.0),
+                              ),
+                              labelStyle: TextStyle(color: Colors.green),
+                              suffixIcon: IconButton(
+                                  onPressed: () {
+                                    print("Pressed");
+                                    model.setVisibility(!model.visibility);
+                                  },
+                                  icon: Icon(
+                                    model.visibility
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                    color: Colors.black,
+                                  ))),
+                        ),
+                      ),
+                      model.isLoading
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1.5,
+                                color: inColor,
+                              ),
+                            )
+                          : Container(
+                              height: 50,
+                              width: double.infinity,
+                              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                              decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.circular(defaultRadius)),
+                              child: RaisedButton(
+                                textColor: Colors.white,
+                                color: Colors.green,
+                                child: Text('تحديث كلمة المرور'),
+                                onPressed: () async {
+                                  if (_formKey.currentState!.validate()) {
+                                    print(passwordController.text);
+                                    await model.updatePassword(
+                                        sharedPrefs.getUser().sId!,
+                                        passwordController.text);
+                                  }
+                                },
+                              )),
+                    ],
+                  ),
+                ),
+              ));
         });
   }
 
@@ -164,6 +164,7 @@ class _ProfilePageState extends State<ProfilePage>
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      resizeToAvoidBottomInset: false,
       appBar:
           AppBar(backgroundColor: Colors.transparent, elevation: 0.0, actions: [
         RaisedButton.icon(

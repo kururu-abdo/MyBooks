@@ -45,4 +45,20 @@ class SignUpViewModel extends BaseViewModel {
       _setFailure(error);
     });
   }
+
+  updatePassword(String uid, String pwd) async {
+    _setLoading(true);
+    var result = await Api.updatePassword(pwd, uid);
+
+    result.fold((l) {
+      _setLoading(false);
+    
+      ToastServices.displayToast('تم تحديث كلمة المرور بنجاح',
+          type: ToastType.Success);
+    }, (error) {
+      ToastServices.displayToast(error.message, type: ToastType.Error);
+      _setLoading(false);
+      _setFailure(error);
+    });
+  }
 }

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'dart:io';
+import 'dart:math';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +18,7 @@ import 'package:mybooks/core/utils/failure.dart';
 
 class Api {
   static const endpoint = 'http://192.168.8.172:7000';
-  //'https://heroku-kururu-mybooks.herokuapp.com';
+  //  'https://heroku-kururu-mybooks.herokuapp.com';
 
   static Future<Either<User, Failure>> SignUser(NewUser user) async {
     try {
@@ -934,6 +936,39 @@ class Api {
       if (res.statusCode == 200) {
         print(json.decode(res.body));
         return Left(json.decode(res.body));
+      } else if (res.statusCode == 500 ||
+          res.statusCode == 501 ||
+          res.statusCode == 503) {
+        return Right(CustomServerException("خطأ في الخادم"));
+      } else if (res.statusCode == 403) {
+        return Right(
+            CustomUnauthorizedException(" غير مصرح لك بإجراء العملية "));
+      } else if (res.statusCode == 404) {
+        return Right(CustomUnauthorizedException(" هذا الحساب موجود بالفعل  "));
+      } else {
+        return Right(UnknownException("خطأ غير معروف"));
+      }
+    } on TimeoutException {
+      return Right(CustomTimeoutException("انتهت مهلة الاتصال"));
+    } on SocketException {
+      print("Done");
+      return Right(CustomConnectionException(" تأكد من الاتصال بالانترنت"));
+    } catch (e) {
+      print(e.toString());
+      return Right(UnknownException("خطأ غير معروف"));
+    }
+  }
+
+  static Future<Either<dynamic, Failure>> updatePassword(
+      String pwd, String uid) async {
+    try {
+      var res = await http.post(Uri.parse(endpoint + "/user/update-password"),
+          body: <String, dynamic>{
+            "uid": uid,
+            "password": pwd
+          }).timeout(Duration(seconds: 12));
+      if (res.statusCode == 200) {
+        return Left(res.body);
       } else if (res.statusCode == 500 ||
           res.statusCode == 501 ||
           res.statusCode == 503) {

@@ -2,6 +2,7 @@ import 'package:mybooks/core/model/payment_trans.dart';
 import 'package:mybooks/core/services/api.dart';
 import 'package:mybooks/core/services/sharedPrefs_service.dart';
 import 'package:mybooks/core/utils/failure.dart';
+import 'package:mybooks/main.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:stacked/stacked.dart';
 
@@ -42,7 +43,6 @@ class PaymentViewModel extends BaseViewModel {
 
   void deleteAccount2(data) {
     var result = data['amount'];
-    
   }
 
   void updateAccount(data) {
@@ -89,6 +89,7 @@ class PaymentViewModel extends BaseViewModel {
 
       // sharedPrefs.getUser().sId!
       _setLoading(false);
+      nav.navigateBack();
     }, (error) {
       _setLoading(false);
       _setFailure(error);

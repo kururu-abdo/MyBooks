@@ -68,6 +68,8 @@ class _UserTransactionState extends State<EditTransaction> {
                       child: Directionality(
                         textDirection: TextDirection.rtl,
                         child: CheckboxListTile(
+                          activeColor: Colors.green,
+
                           title: Text("تم السداد"), //    <-- label
                           value: widget.transaction!.status == 'done',
                           onChanged: (newValue) async {
